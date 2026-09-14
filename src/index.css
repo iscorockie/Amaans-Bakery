@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Amaan's Bakery — global styles
+--------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream font-body text-cocoa antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    @apply bg-gold/60 text-cocoa;
+  }
+
+  /* Hide native number input spinners — we render our own steppers. */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* Date/time pickers should inherit brand color */
+  input[type="date"],
+  input[type="time"] {
+    color-scheme: light;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .card-surface {
+    @apply rounded-2xl border border-cocoa/10 bg-white shadow-soft;
+  }
+
+  .input-base {
+    @apply w-full rounded-xl border border-cocoa/15 bg-white px-4 py-3 text-sm font-semibold text-cocoa
+      placeholder:font-normal placeholder:text-cocoa/40
+      focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/40
+      transition-shadow;
+  }
+
+  .input-error {
+    @apply border-danger/60 bg-danger-soft focus:border-danger focus:ring-danger/25;
+  }
+}
+
+/* Thin, warm scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(123, 30, 30, 0.35) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(123, 30, 30, 0.35);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
