@@ -14,6 +14,18 @@
   body {
     @apply bg-cream font-body text-cocoa antialiased;
     text-rendering: optimizeLegibility;
+    /* Subtle artisan paper grain over the cream background */
+    background-image: radial-gradient(rgba(62, 39, 35, 0.04) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Sora is geometric — large display text reads premium with tight tracking */
+  h1, h2, h3, h4, .font-display {
+    letter-spacing: -0.015em;
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 
   ::selection {
@@ -73,4 +85,18 @@
 }
 *::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Bakery marquee ticker (transform-only, disabled for reduced motion) */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

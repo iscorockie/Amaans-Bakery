@@ -4,8 +4,13 @@
  */
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, CakeSlice, Wheat, TimerReset, HeartHandshake } from "lucide-react";
+import { ArrowRight, CakeSlice, Wheat, TimerReset, HeartHandshake, Star } from "lucide-react";
 import Button from "../ui/Button";
+
+const MARQUEE = [
+  "Mandazi", "Butter Croissants", "Red Velvet", "Chapati", "Tiramisu",
+  "Matooke Banana Bread", "Cupcakes", "Beef Samosas", "Cheesecake", "Cinnamon Rolls",
+];
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -37,8 +42,30 @@ export default function Hero() {
           className="h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/70 to-primary/20" />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-primary/80 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-cocoa-fade" />
       </div>
+
+      {/* Floating rating card */}
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 24, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ delay: 0.55, type: "spring", stiffness: 260, damping: 22 }}
+        className="absolute bottom-28 right-10 z-10 hidden lg:block"
+      >
+        <motion.div
+          animate={reduce ? undefined : { y: [0, -8, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="rounded-2xl bg-white/95 px-6 py-5 shadow-card backdrop-blur"
+        >
+          <p className="flex items-center gap-1" aria-label="Rated 4.9 out of 5">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-4 w-4 fill-gold text-gold" aria-hidden />
+            ))}
+          </p>
+          <p className="mt-1 font-display text-2xl font-extrabold text-cocoa">4.9/5</p>
+          <p className="text-xs font-bold text-cocoa-light">2,300+ happy orders in Kampala</p>
+        </motion.div>
+      </motion.div>
 
       <div className="container-x relative py-24 sm:py-32 lg:py-40">
         <div className="max-w-2xl space-y-6">
@@ -83,6 +110,20 @@ export default function Hero() {
               </li>
             ))}
           </motion.ul>
+        </div>
+      </div>
+
+      {/* Gold marquee ticker */}
+      <div className="relative border-t border-cream/10 bg-gold text-cocoa">
+        <div className="overflow-hidden py-3" aria-hidden>
+          <div className="animate-marquee flex w-max whitespace-nowrap text-[11px] font-extrabold uppercase tracking-[0.22em]">
+            {[...MARQUEE, ...MARQUEE].map((t, i) => (
+              <span key={i} className="flex items-center">
+                <span className="px-6">{t}</span>
+                <span className="text-primary">✦</span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>

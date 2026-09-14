@@ -134,7 +134,7 @@ export default function SpecialOrderWizard() {
             onSubmit={handleSubmit(onSubmit, invalidAttempt)}
             className="card-surface overflow-hidden"
           >
-            <div className="border-b border-cocoa/10 bg-white px-6 pb-8 pt-6 sm:px-8">
+            <div className="border-b border-cocoa/10 bg-cream/60 bg-warm-glow px-6 pb-8 pt-6 sm:px-8">
               <StepProgressBar step={step} />
             </div>
 

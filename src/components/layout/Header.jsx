@@ -2,11 +2,12 @@
  * Sticky navbar — shared-element underline via layoutId glides between the
  * active route, cart badge springs on count change, mobile menu animates.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ShoppingBag, Menu, X, Cake } from "lucide-react";
+import { ShoppingBag, Menu, X, Cake, MessageCircle } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { BAKERY, whatsAppLink } from "../../lib/whatsapp";
 
 const LINKS = [
   { to: "/", label: "Home", end: true },
@@ -33,10 +34,40 @@ function BrandMark() {
 export default function Header() {
   const { count, setOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const reduce = useReducedMotion();
 
+  // Visual only: elevate the header once the page scrolls
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-cocoa/10 bg-cream/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40">
+      {/* Announcement ribbon */}
+      <div className="bg-berry-gold text-cream">
+        <div className="container-x flex h-8 items-center justify-center gap-2 text-[11px] font-extrabold tracking-wide sm:justify-between">
+          <p className="truncate">Fresh bakes daily · Kira Bulindo, Kampala</p>
+          <a
+            href={whatsAppLink(`Hello ${BAKERY.name}! I'd like to place an order.`)}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden items-center gap-1.5 rounded-full bg-cream/15 px-3 py-1 transition-colors hover:bg-cream/25 sm:inline-flex"
+          >
+            <MessageCircle className="h-3 w-3" aria-hidden /> Order on WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div
+        className={[
+          "border-b bg-cream/90 backdrop-blur-md transition-shadow duration-300",
+          scrolled ? "border-cocoa/10 shadow-soft" : "border-cocoa/5",
+        ].join(" ")}
+      >
       <div className="container-x flex h-16 items-center justify-between gap-4">
         <BrandMark />
 
@@ -140,6 +171,7 @@ export default function Header() {
           </motion.nav>
         )}
       </AnimatePresence>
+      </div>
     </header>
   );
 }

@@ -8,6 +8,7 @@ import { BAKERY, whatsAppLink } from "../../lib/whatsapp";
 export default function Footer() {
   return (
     <footer className="mt-20 bg-primary text-cream">
+      <div className="h-px bg-gradient-to-r from-transparent via-gold to-transparent" aria-hidden />
       <div className="container-x grid gap-10 py-14 md:grid-cols-3">
         {/* Brand */}
         <div className="space-y-4">

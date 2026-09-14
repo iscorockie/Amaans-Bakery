@@ -63,10 +63,10 @@ export default function LiveCakeSummary({ control }) {
 
   return (
     <aside
-      className="card-surface flex h-fit flex-col gap-5 p-6 lg:sticky lg:top-24"
+      className="card-surface flex h-fit flex-col gap-5 overflow-hidden p-6 lg:sticky lg:top-24"
       aria-label="Live cake summary and price estimate"
     >
-      <div className="flex items-center gap-3">
+      <div className="-mx-6 -mt-6 mb-1 flex items-center gap-3 rounded-t-2xl border-b border-gold/20 bg-warm-glow px-6 py-5">
         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-gold shadow-card shadow-primary/30">
           <CakeSlice className="h-6 w-6" aria-hidden />
         </span>
