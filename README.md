@@ -32,6 +32,9 @@ Stack: **React 18 + Vite · Tailwind CSS · Framer Motion v11 · React Hook Form
    enabling/disabling **Next / Submit**.
 3. **`trigger(STEP_FIELDS[step])`** on “Next” → current-step-only validation + inline errors.
 4. Values live in one form → nothing resets between steps (`isDirty` shows a draft pill).
+   The draft (values **and** current step) also autosaves to `sessionStorage`, so an
+   accidental refresh resumes exactly where you left off; it clears on submit/reset.
+   Completed progress dots are clickable to jump back.
 5. `isSubmitting` guards double submits; `isValid` is the whole-form final guard;
    `mode: "onChange"` clears errors as fields correct.
 6. Soft rules: empty fillings/frosting never block — gentle encouragement instead.
@@ -113,6 +116,7 @@ before ever reaching for Motion One.)
 npm install
 npm run dev        # http://localhost:5173
 npm run build && npm run preview
+npm test           # jsdom smoke tests: full wizard walk + shop/cart flows
 ```
 
 No env vars. Orders open WhatsApp deep links — no backend required.

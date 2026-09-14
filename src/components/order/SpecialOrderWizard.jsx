@@ -15,7 +15,7 @@
  *  - pure price math memoized with useMemo.
  *  - transform/opacity-only step transitions (AnimatePresence mode="wait").
  */
-import { useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -49,13 +49,50 @@ const stepVariants = {
 
 const pick = (obj, keys) => Object.fromEntries(keys.map((k) => [k, obj[k]]));
 
+/* Draft persistence — an accidental refresh never eats your cake design. */
+const DRAFT_KEY = "amaans-bake-your-cake-draft";
+
+function loadDraft() {
+  try {
+    const raw = typeof sessionStorage !== "undefined" && sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return {
+      step: Number.isInteger(parsed.step) ? Math.min(Math.max(parsed.step, 0), LAST) : 0,
+      values: { ...SPECIAL_ORDER_DEFAULTS, ...(parsed.values || {}) },
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(payload) {
+  try {
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+  } catch {
+    /* private mode etc. — non-fatal */
+  }
+}
+
+function clearDraft() {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* noop */
+  }
+}
+
 export default function SpecialOrderWizard() {
   const reduce = useReducedMotion();
-  const [step, setStep] = useState(0);
+  const [initialDraft] = useState(loadDraft);
+  const [step, setStep] = useState(initialDraft?.step ?? 0);
   const [direction, setDirection] = useState(1);
   const [shake, setShake] = useState(0);
   const [success, setSuccess] = useState(null);
   const [submitError, setSubmitError] = useState("");
+  const formCardRef = useRef(null);
+  const firstRender = useRef(true);
 
   const {
     control,
@@ -67,10 +104,30 @@ export default function SpecialOrderWizard() {
   } = useForm({
     resolver: zodResolver(specialOrderSchema),
     mode: "onChange", // live re-validation: errors clear as the user corrects
-    defaultValues: SPECIAL_ORDER_DEFAULTS,
+    defaultValues: initialDraft?.values ?? SPECIAL_ORDER_DEFAULTS,
   });
 
   const watched = useWatch({ control });
+
+  // Debounced draft autosave
+  useEffect(() => {
+    const t = setTimeout(() => saveDraft({ step, values: watched }), 250);
+    return () => clearTimeout(t);
+  }, [watched, step]);
+
+  // Keep the wizard in view when the step changes (matters on mobile)
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    if (typeof formCardRef.current?.scrollIntoView === "function") {
+      formCardRef.current.scrollIntoView({
+        behavior: reduce ? "auto" : "smooth",
+        block: "start",
+      });
+    }
+  }, [step, reduce]);
 
   /** Instant per-step validity (drives the disabled state of Next/Submit). */
   const stepValid = useMemo(
@@ -98,6 +155,7 @@ export default function SpecialOrderWizard() {
     try {
       await new Promise((r) => setTimeout(r, 1100)); // chef checks the oven 🧑🏾‍🍳
       const { total } = priceSpecialOrder(values);
+      clearDraft(); // the design became an order — drop the draft
       setSuccess({
         code: `AB-${Math.floor(1000 + Math.random() * 9000)}`,
         values,
@@ -110,6 +168,7 @@ export default function SpecialOrderWizard() {
   };
 
   const startOver = () => {
+    clearDraft();
     reset(SPECIAL_ORDER_DEFAULTS);
     setSuccess(null);
     setStep(0);
@@ -131,11 +190,18 @@ export default function SpecialOrderWizard() {
           {/* Form card */}
           <form
             noValidate
+            ref={formCardRef}
             onSubmit={handleSubmit(onSubmit, invalidAttempt)}
-            className="card-surface overflow-hidden"
+            className="card-surface scroll-mt-32 overflow-hidden"
           >
             <div className="border-b border-cocoa/10 bg-cream/60 bg-warm-glow px-6 pb-8 pt-6 sm:px-8">
-              <StepProgressBar step={step} />
+              <StepProgressBar
+                step={step}
+                onStepClick={(i) => {
+                  setDirection(-1);
+                  setStep(i);
+                }}
+              />
             </div>
 
             <div className="px-6 py-8 sm:px-8">

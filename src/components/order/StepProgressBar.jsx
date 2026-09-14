@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
 import { STEP_TITLES } from "../../schemas/specialOrderSchemas";
 
-export default function StepProgressBar({ step }) {
+export default function StepProgressBar({ step, onStepClick }) {
   const reduce = useReducedMotion();
   const pct = (step / (STEP_TITLES.length - 1)) * 100;
 
@@ -35,15 +35,29 @@ export default function StepProgressBar({ step }) {
                       : { scale: 1 }
                   }
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  aria-current={current ? "step" : undefined}
+                  {...(done && onStepClick
+                    ? {
+                        role: "button",
+                        tabIndex: 0,
+                        "aria-label": `Go back to step ${i + 1}: ${s.title}`,
+                        onClick: () => onStepClick(i),
+                        onKeyDown: (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onStepClick(i);
+                          }
+                        },
+                      }
+                    : {})}
                   className={[
                     "grid h-9 w-9 place-items-center rounded-full border-2 text-xs font-extrabold transition-colors",
                     done
-                      ? "border-primary bg-primary text-cream"
+                      ? "cursor-pointer border-primary bg-primary text-cream hover:bg-primary-700"
                       : current
                         ? "border-gold bg-white text-primary shadow-card"
                         : "border-cocoa/15 bg-white text-cocoa/40",
                   ].join(" ")}
-                  aria-current={current ? "step" : undefined}
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     {done ? (
