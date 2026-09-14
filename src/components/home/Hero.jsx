@@ -93,7 +93,7 @@ export default function Hero() {
               </Button>
             </Link>
             <Link to="/order" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-cream/70 text-cream hover:bg-cream hover:text-primary">
+              <Button size="lg" variant="outlineLight" className="w-full sm:w-auto">
                 <CakeSlice className="h-5 w-5" aria-hidden /> Special Order – Bake Your Cake
               </Button>
             </Link>

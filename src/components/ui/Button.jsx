@@ -12,6 +12,10 @@ const VARIANTS = {
   gold: "bg-gold text-cocoa hover:bg-gold-dark focus-visible:ring-gold/50 shadow-card shadow-gold/25",
   outline:
     "border-2 border-primary/70 text-primary hover:bg-primary hover:text-cream focus-visible:ring-primary/30",
+  // For dark/photographic backgrounds (hero) — light stroke & text so the
+  // label always reads clearly; never rely on overriding `outline`.
+  outlineLight:
+    "border-2 border-cream/80 text-cream hover:bg-cream hover:text-primary focus-visible:ring-cream/40",
   ghost: "text-primary hover:bg-primary/10 focus-visible:ring-primary/30",
   whatsapp:
     "bg-[#1FAF57] text-white hover:bg-[#178A45] shadow-card shadow-[#1FAF57]/25 focus-visible:ring-[#1FAF57]/40",
