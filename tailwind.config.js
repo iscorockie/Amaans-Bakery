@@ -38,7 +38,7 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Playfair Display"', "Georgia", "serif"],
+        display: ['"Sora"', "ui-sans-serif", "system-ui", "sans-serif"],
         body: ['"Nunito Sans"', "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
