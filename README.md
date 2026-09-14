@@ -4,123 +4,134 @@
 > WhatsApp: +256 772 606296 · +256 744 850346
 
 A production-ready online bakery storefront: homepage, categorized shop with a
-product **Customize & Order** flow, and the flagship **“Bake Your Own Cake”**
-six-step special-order builder with a live visual summary and dynamic UGX price
-estimate. Built with **React 18 + Vite, Tailwind CSS, Framer Motion v11,
-React Hook Form + Zod**.
+**Customize & Order** flow, and the flagship **“Bake Your Own Cake”** six-step
+wizard with a live visual summary and dynamic UGX price estimate.
+
+Stack: **React 18 + Vite · Tailwind CSS · Framer Motion v11 · React Hook Form + Zod**.
+
+> **Fonts (per owner instruction):** headings/display use **Sora**, body uses
+> **Nunito Sans** — intentionally *not* Playfair/Inter. Do not change.
 
 ---
 
 ## 1 · Architecture
 
-| Concern            | Approach |
-|--------------------|----------|
-| Routing            | `react-router-dom` — `/` (home), `/shop`, `/order` |
-| Styling            | Tailwind with a brand theme (`primary #7B1E1E`, `cream #F8F1E3`, `gold #D4A373`, `cocoa #3E2723`) |
-| Animation          | Framer Motion v11 — `layout`, `layoutId`, `AnimatePresence mode="wait"`, springs, `useReducedMotion()` everywhere |
-| Forms              | **One** `useForm` per flow, `zodResolver`, per-step Zod schemas + a combined schema |
-| Cart               | React context; confirmed over **WhatsApp** deep links (the bakery’s real workflow) |
-| Data               | Plain JS modules (`data/products.js`, `data/orderOptions.js`) — UGX prices |
-| Pricing            | Pure functions in `lib/pricing.js`, consumed by `useWatch`-driven summaries |
+| Concern   | Approach |
+|-----------|----------|
+| Routing   | `react-router-dom` — `/` (home), `/shop`, `/order` |
+| Styling   | Tailwind theme: `primary #7B1E1E`, `cream #F8F1E3`, `gold #D4A373`, `cocoa #3E2723`, soft shadows + warm brand gradients (`warm-glow`, `berry-gold`, `cocoa-fade`) |
+| Animation | **Framer Motion v11** (see decision below) |
+| Forms     | One `useForm` per flow · `zodResolver` · per-step schemas + combined schema · `trigger()` gating · `useWatch` summaries |
+| Cart      | React context; confirmed via **WhatsApp** deep links |
+| Perf      | `React.memo` presentational primitives (`ProductCard`, `SelectionCard`, `IngredientChip`, `CategoryFilter`), scoped `useWatch`, `useMemo` price math, transform/opacity-only animations |
 
-### Multi-step form strategy (React Hook Form + Zod)
+### Multi-step form strategy (RHF + Zod)
 
-Both flows keep **a single `useForm` instance** for the whole wizard:
-
-1. **Combined schema** → `zodResolver(specialOrderSchema)` so the *final* submit validates everything.
-2. **Per-step schemas** (`STEP_SCHEMAS`) → `safeParse` over `useWatch` values gives an *instant* `stepValid`
-   that enables/disables **Next / Submit**.
-3. **`trigger(STEP_FIELDS[step])`** on “Next” → validates only the current step and surfaces inline errors.
-4. **Persistence** → values live in one form, so navigating back/forward never resets anything
-   (`isDirty` drives the “draft in progress” pill).
-5. **Live summary & price** → `useWatch({ control })` in `SummaryCard` / `LiveSummary` +
-   pure `priceSpecialOrder()` / `priceCustomization()` recompute on every change.
-6. **Controls** → `register` for plain inputs/textareas; `Controller` for every custom UI
-   (option cards, chips, steppers, the ingredient `Record<id, qty>` map).
-7. **States** → `isSubmitting` guards double submits (plus disabled buttons), `isValid` is the
-   final whole-form guard on submit, errors clear live (`mode: "onChange"`).
-8. **Soft rules** → empty fillings/frosting never block “Next”; the UI shows gentle encouragement instead.
-
-Validation encoded in Zod: size & shape required · flavor required (custom flavor needs detail) ·
-cake message ≤ 100 chars · date must be **tomorrow or later** · Ugandan phone (`+256 7…` / `07…`) ·
-name/contact required · delivery requires an address (`superRefine`).
-
-### Framer Motion notes (v11)
-
-- Modern named imports from `framer-motion`; explicit spring configs (`{ type: "spring", stiffness, damping }`).
-- Shared elements via `layoutId`: navbar underline, shop category pill, option-card selection halo.
-- `layout` animations: summary chips, price lines, cart items, product grid.
-- Step transitions: `AnimatePresence mode="wait"` with direction-aware slide variants (opacity/transform only).
-- Micro-interactions: button `whileTap`, error **shake** keyframes, spring price counter, success entrance.
-- Every animation respects `useReducedMotion()`.
+1. **Combined schema** → `zodResolver(specialOrderSchema)` validates the final submit.
+2. **Per-step schemas** (`STEP_SCHEMAS`) + `safeParse` over `useWatch` → instant `stepValid`
+   enabling/disabling **Next / Submit**.
+3. **`trigger(STEP_FIELDS[step])`** on “Next” → current-step-only validation + inline errors.
+4. Values live in one form → nothing resets between steps (`isDirty` shows a draft pill).
+5. `isSubmitting` guards double submits; `isValid` is the whole-form final guard;
+   `mode: "onChange"` clears errors as fields correct.
+6. Soft rules: empty fillings/frosting never block — gentle encouragement instead.
+7. Zod rules: size/shape/flavor required · message ≤100 chars · date ≥ tomorrow ·
+   Ugandan phone (`+256 7…` / `07…`) · name/contact required · delivery ⇒ address (`superRefine`).
 
 ---
 
-## 2 · File structure
+## 2 · Animation Library Decision — **Framer Motion** (not Motion One)
+
+**Investigation summary** (npm metadata + current docs/guides):
+
+| Criterion | Motion One (`@motionone/*`) | Framer Motion v11+ (`framer-motion` / `motion`) |
+|---|---|---|
+| Bundle | ~3.8 kB (WAAPI-only core) | ~30 kB gzip full, ~15 kB lazy-loaded |
+| API style | Imperative (`animate(el, …)`) | Declarative React (`<motion.div>`) |
+| **Layout animations / reflow** | ❌ not supported [1] | ✅ `layout` prop |
+| **Shared element transitions** | ❌ [1] | ✅ `layoutId` |
+| **Exit/presence orchestration** | manual only [1] | ✅ `AnimatePresence mode="wait"` |
+| Wizard step transitions | hand-rolled | variants + custom direction |
+| Springs & micro-interactions | `spring()` manual | `whileTap/whileHover` + spring configs |
+| Reduced motion | manual media query | ✅ `useReducedMotion()` |
+| React integration | thin wrapper, **archived 2023-09** (npm) | first-class, actively maintained |
+| Perf model | pure WAAPI (off-main-thread) | hybrid: WAAPI for transform/opacity + JS where needed [2] |
+
+**Why this project needs Framer Motion’s exclusive strengths:**
+- *Live summary card reflow & chip reordering* → `layout` animations.
+- *Shared-element transitions* → navbar underline, category pill, selection-card halo (`layoutId`).
+- *Wizard + modal + cart enter/exit choreography* → `AnimatePresence`.
+
+Motion One cannot do any of these declaratively; we’d hand-roll exit timing and layout
+measurement, losing correctness for ~25 kB. Its perf advantage (pure WAAPI) is largely
+neutralized because Framer Motion also hardware-accelerates transform/opacity via WAAPI [2],
+and our animations are transform/opacity-only by design.
+
+**Hybrid considered & rejected:** adding Motion One just for micro-interactions would save
+≈3 kB while introducing a second imperative mental model; Framer’s `whileTap/whileHover`
+already cover those for free.
+
+**Final recommendation: Framer Motion v11, single library.** [1][2]
+(If a future hard bundle budget appears, `LazyMotion` + `domAnimation` halves FM’s cost
+before ever reaching for Motion One.)
+
+[1](https://www.pkgpulse.com/guides/framer-motion-vs-motion-one-vs-autoanimate-2026) ·
+[2](https://motion.dev/magazine/should-i-use-framer-motion-or-motion-one)
+
+---
+
+## 3 · File structure
 
 ```
-├── index.html                     # fonts, meta, favicon
-├── package.json / vite.config.js / tailwind.config.js / postcss.config.js
-├── public/images/                 # self-contained product & hero imagery
+├── index.html                        # Sora + Nunito Sans, meta, favicon
+├── package.json · vite.config.js · tailwind.config.js · postcss.config.js
+├── public/images/                    # self-contained product & hero imagery (20)
 └── src/
-    ├── main.jsx / App.jsx         # providers + routes
-    ├── index.css                  # Tailwind layers, base styles
-    ├── data/
-    │   ├── products.js            # catalogue (UGX) + categories
-    │   └── orderOptions.js        # ingredients, sizes, flavors, pricing options
-    ├── lib/
-    │   ├── format.js              # UGX + date helpers
-    │   ├── pricing.js             # pure quote calculators
-    │   └── whatsapp.js            # wa.me deep links + brand contact
-    ├── schemas/
-    │   ├── specialOrderSchemas.js # step schemas + combined + STEP_FIELDS
-    │   └── customizationSchema.js
-    ├── context/CartContext.jsx
+    ├── main.jsx · App.jsx            # providers + routes
+    ├── index.css
+    ├── data/        products.js · orderOptions.js
+    ├── lib/         format.js · pricing.js · whatsapp.js
+    ├── schemas/     specialOrderSchemas.js · customizationSchema.js
+    ├── context/     CartContext.jsx
     ├── components/
-    │   ├── ui/                    # Button, ErrorText, QtyStepper, SmartImage, SectionHeading
-    │   ├── layout/                # Navbar (layoutId underline), Footer, CartDrawer, Layout
-    │   ├── home/                  # Hero, Featured, About
-    │   ├── shop/ProductCard.jsx
-    │   ├── customize/CustomizeModal.jsx   # provider + RHF/Zod modal + live summary
-    │   └── order/                 # controls.jsx, steps.jsx (6 steps), ProgressBar,
-    │                              #   SummaryCard, SuccessPanel
-    └── pages/                     # HomePage, ShopPage, SpecialOrderPage
+    │   ├── ui/          Button · ErrorText · QtyStepper · SmartImage · SectionHeading
+    │   ├── layout/      Header · Footer · CartDrawer · Layout
+    │   ├── home/        Hero · Featured · About
+    │   ├── shop/        ProductCard (memo) · CategoryFilter (memo)
+    │   ├── customize/   CustomizeModal (+provider) — RHF/Zod, live summary
+    │   └── order/       SpecialOrderWizard · LiveCakeSummary · StepProgressBar
+    │                    · SuccessPanel · steps.jsx · controls.jsx
+    │                    · SelectionCard (memo) · IngredientChip (memo)
+    └── pages/       HomePage · ShopPage · SpecialOrderPage
 ```
 
 ---
 
-## 3 · Run it
+## 4 · Run it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm run build      # production build → dist/
-npm run preview    # serve the build
+npm run build && npm run preview
 ```
 
-No environment variables required. Orders open WhatsApp deep links — no backend needed.
+No env vars. Orders open WhatsApp deep links — no backend required.
 
 ---
 
-## 4 · Using the flows
+## 5 · How layout-style animations were implemented (Framer Motion)
 
-- **Shop** → filter by category → *Customize & Order* → tick ingredients (qty steppers appear),
-  add chef notes, quantity → **Add to Cart** → basket drawer → *Confirm on WhatsApp*.
-- **Bake Your Cake** (`/order`) → six steps with progress bar → live cake card + UGX estimate on
-  the right → **Submit Special Order** → success panel with reference code and a pre-filled
-  *Confirm on WhatsApp* button.
-
----
-
-## 5 · Notes on RHF + Zod ↔ live summary ↔ Framer Motion
-
-- The summary cards are **pure consumers of `useWatch`** — they re-render on form change but never
-  write to the form, so there is no render loop and no conflict with Framer Motion’s
-  `AnimatePresence` (controlled inputs stay mounted; only presentation nodes animate in/out).
-- Price counters animate with a keyed `motion.span` (`key={total}`) spring — cheap, transform-only.
-- Chip/card lists use `layout` + `layoutId`; because RHF state changes are ordinary React state,
-  Framer’s layout measurement runs after commit and never fights the resolver.
-- Errors render via `formState.errors` with `role="alert"` + `aria-describedby`; the navigation row
-  remounts (`key={nav-${shake}}`) to replay the invalid-attempt shake without touching form state.
+- **LiveCakeSummary** consumes `useWatch({ control })`; rows/chips carry `layout` so the card
+  reflows elegantly as ingredients appear; the price counter is a keyed spring `motion.span`.
+- **IngredientChip** uses `layout` + `whileTap`; siblings reflow when one is removed.
+- **SelectionCard** halo uses `layoutId` per group → the gold ring *slides* between cards.
+- **Wizard steps**: `AnimatePresence mode="wait"` + direction-aware variants
+  (opacity/transform only); progress fill is a spring width; dots flip to checks with springs.
+- **Micro-interactions**: `whileTap`/`whileHover` springs on buttons/cards; invalid attempts
+  replay a keyframe shake via keyed remount (`key={nav-${shake}}`).
+- **Reduced motion**: every component checks `useReducedMotion()` and collapses to
+  opacity-only or instant states.
+- **Performance**: transform/opacity-only animations, memoized leaf components, scoped
+  `useWatch` per field, `useMemo` quotes — mobile stays at 60 fps.
 
 Made with ❤️ (and a lot of butter) in Kira Bulindo.

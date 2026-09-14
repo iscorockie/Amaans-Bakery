@@ -46,7 +46,7 @@ export default function SuccessPanel({ order, onReset }) {
       className="card-surface mx-auto max-w-2xl overflow-hidden"
       role="status"
     >
-      <div className="bg-primary px-8 py-10 text-center">
+      <div className="bg-primary bg-warm-glow px-8 py-10 text-center">
         <motion.span
           initial={reduce ? false : { scale: 0, rotate: -30 }}
           animate={{ scale: 1, rotate: 0 }}

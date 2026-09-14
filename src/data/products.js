@@ -65,6 +65,14 @@ export const PRODUCTS = [
     image: "images/samosas.png",
     description: "Crisp golden triangles stuffed with spiced minced beef & onion.",
   },
+  {
+    id: "cinnamon-rolls",
+    name: "Glazed Cinnamon Rolls (4 pc)",
+    category: "pastries",
+    price: 12000,
+    image: "images/cinnamon-rolls.jpg",
+    description: "Pillowy pull-apart swirls dripping with vanilla-bean glaze.",
+  },
   // ------------------------------------------------------------ Snacks
   {
     id: "glazed-donut",

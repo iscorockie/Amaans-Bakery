@@ -91,32 +91,16 @@ export function StepFlavor({ control, register, errors }) {
 
 /* ------------------------------------------------ Step 3 — Fillings */
 export function StepFillings({ control, errors }) {
-  const fillings = useWatch({ control, name: "fillings" }) || [];
   return (
-    <div className="space-y-4">
-      <ChipGroup
-        control={control}
-        name="fillings"
-        legend="Layer in some fillings (optional)"
-        options={SPECIAL_FILLINGS}
-        error={errors.fillings}
-        errorId="step-fillings-error"
-      />
-      <AnimatePresence>
-        {fillings.length === 0 && (
-          <motion.p
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            className="flex items-start gap-2 rounded-xl bg-gold/15 px-4 py-3 text-xs font-bold text-cocoa-light"
-          >
-            <Info className="mt-px h-4 w-4 shrink-0 text-gold-dark" aria-hidden />
-            No fillings yet — that’s okay! A layer of ganache or passion curd makes slices sing,
-            but a classic sponge is lovely too.
-          </motion.p>
-        )}
-      </AnimatePresence>
-    </div>
+    <ChipGroup
+      control={control}
+      name="fillings"
+      legend="Layer in some fillings (optional)"
+      options={SPECIAL_FILLINGS}
+      error={errors.fillings}
+      errorId="step-fillings-error"
+      softHintWhenEmpty="No fillings yet — that’s okay! A layer of ganache or passion curd makes slices sing, but a classic sponge is lovely too."
+    />
   );
 }
 

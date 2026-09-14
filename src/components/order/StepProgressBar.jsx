@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
 import { STEP_TITLES } from "../../schemas/specialOrderSchemas";
 
-export default function ProgressBar({ step }) {
+export default function StepProgressBar({ step }) {
   const reduce = useReducedMotion();
   const pct = (step / (STEP_TITLES.length - 1)) * 100;
 

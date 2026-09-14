@@ -56,7 +56,7 @@ function Chips({ ids, finder }) {
   );
 }
 
-export default function SummaryCard({ control }) {
+export default function LiveCakeSummary({ control }) {
   const reduce = useReducedMotion();
   const v = useWatch({ control });
   const quote = useMemo(() => priceSpecialOrder(v), [v]);

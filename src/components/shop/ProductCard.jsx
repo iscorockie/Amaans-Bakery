@@ -2,13 +2,14 @@
  * Product card — image, name, description, UGX price and the
  * "Customize & Order" action. Hover lift + image zoom via transforms only.
  */
+import { memo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { SlidersHorizontal } from "lucide-react";
 import { formatUGX } from "../../lib/format";
 import { CATEGORIES } from "../../data/products";
 import SmartImage from "../ui/SmartImage";
 
-export default function ProductCard({ product, onCustomize, index = 0 }) {
+function ProductCard({ product, onCustomize, index = 0 }) {
   const reduce = useReducedMotion();
   const categoryLabel = CATEGORIES.find((c) => c.id === product.category)?.label ?? product.category;
 
@@ -52,3 +53,5 @@ export default function ProductCard({ product, onCustomize, index = 0 }) {
     </motion.article>
   );
 }
+
+export default memo(ProductCard);

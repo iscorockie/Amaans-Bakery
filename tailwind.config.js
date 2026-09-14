@@ -48,6 +48,13 @@ export default {
       },
       backgroundImage: {
         "grain": "radial-gradient(rgba(62,39,35,0.06) 1px, transparent 1px)",
+        // Warm brand gradients — soft gold pools over deep burgundy.
+        "warm-glow":
+          "radial-gradient(circle at 18% 22%, rgba(212,163,115,0.38), transparent 46%), radial-gradient(circle at 82% 78%, rgba(212,163,115,0.32), transparent 46%)",
+        "cocoa-fade":
+          "linear-gradient(180deg, rgba(62,39,35,0) 0%, rgba(62,39,35,0.6) 100%)",
+        "berry-gold":
+          "linear-gradient(135deg, #7B1E1E 0%, #9A3434 55%, #B9854F 135%)",
       },
     },
   },

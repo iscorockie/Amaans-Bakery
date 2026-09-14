@@ -30,7 +30,7 @@ function BrandMark() {
   );
 }
 
-export default function Navbar() {
+export default function Header() {
   const { count, setOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
   const reduce = useReducedMotion();

@@ -29,14 +29,7 @@ export default function HomePage() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="relative overflow-hidden rounded-3xl bg-primary px-8 py-14 text-center shadow-card sm:px-14"
         >
-          <div
-            className="pointer-events-none absolute inset-0 opacity-20"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 20% 20%, #D4A373 0, transparent 40%), radial-gradient(circle at 80% 80%, #D4A373 0, transparent 40%)",
-            }}
-            aria-hidden
-          />
+          <div className="pointer-events-none absolute inset-0 bg-warm-glow opacity-30" aria-hidden />
           <CakeSlice className="mx-auto h-10 w-10 text-gold" aria-hidden />
           <h2 className="mt-4 font-display text-3xl font-extrabold text-cream sm:text-4xl">
             Dream it. We’ll bake it.
