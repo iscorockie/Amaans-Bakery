@@ -29,6 +29,7 @@ import {
   STEP_TITLES,
 } from "../../schemas/specialOrderSchemas";
 import { priceSpecialOrder } from "../../lib/pricing";
+import { formatUGX } from "../../lib/format";
 import StepProgressBar from "./StepProgressBar";
 import LiveCakeSummary from "./LiveCakeSummary";
 import SuccessPanel from "./SuccessPanel";
@@ -134,6 +135,9 @@ export default function SpecialOrderWizard() {
     () => STEP_SCHEMAS[step].safeParse(pick(watched, STEP_FIELDS[step])).success,
     [watched, step]
   );
+
+  /** Live running quote — powers the sticky mobile estimate bar. */
+  const quote = useMemo(() => priceSpecialOrder(watched), [watched]);
 
   const invalidAttempt = useCallback(() => setShake((s) => s + 1), []);
 
@@ -314,6 +318,20 @@ export default function SpecialOrderWizard() {
 
           {/* Live summary */}
           <LiveCakeSummary control={control} />
+
+          {/* Mobile: the summary rail stacks below the form, so keep the
+              live price in view at all times on small screens. */}
+          <div className="sticky bottom-0 z-30 flex items-center justify-between gap-3 rounded-t-2xl border-t border-gold/30 bg-cream/95 px-5 py-3 shadow-[0_-10px_28px_-14px_rgba(62,39,35,0.45)] backdrop-blur lg:hidden">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-cocoa/60">
+              Live estimate
+            </span>
+            <span
+              className="font-display text-xl font-extrabold tabular-nums text-primary"
+              aria-live="polite"
+            >
+              {formatUGX(quote.total)}
+            </span>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
