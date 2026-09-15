@@ -8,7 +8,8 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "vitest run"
+    "test": "vitest run",
+    "deploy:pages": "npm run build && rm -rf docs && cp -r dist docs && cp dist/index.html docs/404.html && touch docs/.nojekyll"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

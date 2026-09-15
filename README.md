@@ -138,4 +138,29 @@ No env vars. Orders open WhatsApp deep links — no backend required.
 - **Performance**: transform/opacity-only animations, memoized leaf components, scoped
   `useWatch` per field, `useMemo` quotes — mobile stays at 60 fps.
 
+---
+
+## 6 · Deployment (GitHub Pages)
+
+Live at **https://iscorockie.github.io/Amaans-Bakery/**.
+
+- **Current setup:** GitHub Pages → *Deploy from a branch* → publishing branch + `/docs`.
+  The production build lives in `docs/` (with `docs/404.html` as the SPA fallback so
+  `/shop` and `/order` survive refresh). To publish changes run:
+
+  ```bash
+  npm run deploy:pages   # vite build + sync dist → docs/ (incl. 404.html + .nojekyll)
+  git add docs && git commit -m "Rebuild docs/" && git push
+  ```
+
+  Pages rebuilds automatically on push.
+
+- **Routing note:** `vite.config.js` sets `base: /Amaans-Bakery/` and the router uses that
+  base, so the app works in the project-site subpath.
+
+- **Actions-based deploy (ready, pending permissions):** a `.github/workflows/deploy.yml`
+  that builds, tests and deploys with `actions/deploy-pages` (no `docs/` needed) is kept on
+  the working branch until the GitHub app used for pushes is granted *Actions (workflows)*
+  write permission. Once pushed, set the Pages source to **GitHub Actions** in repo settings.
+
 Made with ❤️ (and a lot of butter) in Kira Bulindo.
