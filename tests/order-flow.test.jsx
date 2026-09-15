@@ -34,10 +34,18 @@ describe("Bake Your Own Cake wizard", () => {
 
     expect(screen.getByText("Bake Your Own Cake")).toBeTruthy();
 
+    // The sticky estimate bar keeps the running price in view at all times
+    expect(screen.getByText(/Live estimate/)).toBeTruthy();
+
+    // The right-hand live summary builds the creation + price as we choose
+    const summaryText = () =>
+      screen.getByRole("complementary", { name: /live cake summary/i }).textContent;
+
     // Step 1 — Next locked until size + shape chosen
     expect(nextBtn().disabled).toBe(true);
     await user.click(screen.getByRole("radio", { name: /6" Round/ }));
     expect(nextBtn().disabled).toBe(true); // shape still missing
+    await waitFor(() => expect(summaryText()).toContain("UGX 60,000"));
     await user.click(screen.getByRole("radio", { name: /^Round/ }));
     await waitFor(() => expect(nextBtn().disabled).toBe(false));
     await user.click(nextBtn());
@@ -53,6 +61,9 @@ describe("Bake Your Own Cake wizard", () => {
     await screen.findByText(/Layer in some fillings/, {}, FLOW);
     await user.click(screen.getByRole("checkbox", { name: /Chocolate ganache/ }));
     await waitFor(() => expect(nextBtn().disabled).toBe(false));
+    // summary chip + price react live (60,000 base + 15,000 ganache)
+    await waitFor(() => expect(summaryText()).toContain("Chocolate ganache"));
+    await waitFor(() => expect(summaryText()).toContain("UGX 75,000"));
     await user.click(nextBtn());
 
     // Step 4 — frosting optional (soft)
@@ -64,6 +75,8 @@ describe("Bake Your Own Cake wizard", () => {
     await screen.findByText("Decorations & toppings", {}, FLOW);
     const msg = screen.getByPlaceholderText(/Happy Birthday Aisha/);
     await user.type(msg, "Happy Birthday Aisha");
+    // the cake message appears live on the summary card
+    await waitFor(() => expect(summaryText()).toContain("Happy Birthday Aisha"));
     await user.click(nextBtn());
 
     // Step 6 — delivery details & validation
